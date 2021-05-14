@@ -13,7 +13,7 @@ Covid-19 Modeling Repo for Convex Optimization II
 A conda environment for exact experiment reproduction can be set up and uses with:
 ```
 conda create -y --name covid python==3.7
-conda install -y --name covid --file requirements.txt
+conda install -y --name covid --file requirements.txt -c conda-forge -c pytorch
 conda activate covid
 ...
 conda deactivate
