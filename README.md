@@ -20,11 +20,11 @@ conda deactivate
 ```
 
 ## Download and Process Datasets
-Run `python datasets/download_and_process_data.py' to download and process datasets.
+Run `python datasets/download_and_process_data.py` to download and process datasets.
 
 ## Running Experiments
 To run experiments from the associated paper:
 
 1. Install and activate the environment.
 2. Download and process the datasets.
-3. Run `experiments/convex/main.py` to run experiments
+3. Run `experiments/main.py` to run experiments
