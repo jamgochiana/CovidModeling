@@ -4,7 +4,7 @@ import requests
 sys.path.append('./')
 import pandas as pd
 import numpy as np
-import datasets.process_utils.utils
+from datasets.process_utils.utils import *
 
 # urls
 hospitalizations = "https://data.sfgov.org/api/views/nxjg-bhem/rows.csv" #?accessType=DOWNLOAD
@@ -31,18 +31,19 @@ if not os.path.exists(pathdir+'cases_deaths.csv'):
     csv_file.write(url_content)
     csv_file.close()
 
-    
-# process data
+# load raw data
 hosp = pd.read_csv(pathdir+'hospitalizations.csv')
 c_d = pd.read_csv(pathdir+'cases_deaths.csv')
 
-h = utils.process_hospitalizations(hosp)
-c, d = utils.process_cases_deaths(c_d)
-x = np.stack((c, h, d))
+# process and merge data
+h = process_hospitalizations(hosp)
+c = process_cases(c_d)
+d = process_deaths(c_d)
+df = merge_data([c, h, d]) # order: cases, hospitalizations, deaths
 
 # save out
 processdir = './datasets/processed/'
 if not os.path.exists(processdir):
     os.mkdir(processdir)
-np.savetxt(processdir+'sf.csv', x, delimiter=',')
+df.to_csv(processdir+'sf.csv')
     
