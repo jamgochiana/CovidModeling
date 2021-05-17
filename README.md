@@ -20,7 +20,8 @@ conda deactivate
 ```
 
 ## Download and Process Datasets
-Run `python datasets/download_and_process_data.py` to download and process datasets.
+- Run `python datasets/download_and_process_sf.py` to download and process data from San Francisco.
+- Run `python datasets/download_and_process_country.py --country $COUNTRY_NAME` to download and process data from a specific country.
 
 ## Running Experiments
 To run experiments from the associated paper:
