@@ -12,7 +12,8 @@ def process_hospitalizations(df):
         h (pd.Series): processed hospitalizations series
     """
     
-    hosp = df[df["Hospital"]=="All SF Hospitals"]
+    # (df["Hospital"]=="All SF Hospitals") & (df["CovidStatus"]=="COVID+")
+    hosp = df[(df["Hospital"]=="All SF Hospitals")]
     hosp = hosp[["reportDate", "PatientCount"]].groupby("reportDate").sum()
     dates = pd.to_datetime(hosp.index.values)
     data = hosp.iloc[:,0].to_numpy()
@@ -67,4 +68,29 @@ def merge_data(series):
     combined = pd.concat(series, axis=1).fillna(0)
     dates = pd.date_range(start=start, end=end)
     df = combined.reindex(dates, fill_value=0)
+    return df
+
+def process_world_data(data, country):
+    """
+    Process the world dataframe for a countries cases, hospitalizations, and deaths.
+    
+    Args:
+        data (pd.DataFrame): raw world data frame
+        country (string): country to process
+    Returns:
+        df (pd.DataFrame): processed single country dataframe with mutual dates
+    """
+
+    df = data[data["location"]==country][["date", "new_cases", 
+                                          "hosp_patients", "new_deaths"]]
+    df = df.set_index('date')
+    df = df.reindex(pd.to_datetime(df.index.values))
+    df.columns = ['cases', 'hospitalizations','deaths']
+    indices = [df.index[df[column].notnull()] for column in df.columns]
+    for i in range(len(df.columns)):
+        assert len(indices[i])>0, "No %s found in %s"%(df.columns[i], country)
+    start = max([min(s) for s in indices])
+    end = min([max(s) for s in indices])
+    dates = pd.date_range(start=start, end=end)
+    df = df.reindex(dates, fill_value=0)
     return df
