@@ -58,6 +58,7 @@ def main(model_name, data_file, i_days, mva, batch_size, p_days):
     
     # evaluate metrics
     print("Model:", model_name)
+    c_true, h_true, d_true = test[...,0], test[...,1], test[...,2]
     for (true, pred, name) in [(c_preds, c_true, "Cases"), 
                                (h_preds, h_true, "Hospitalizations"), 
                                (d_preds, d_true, "Deaths")]:
