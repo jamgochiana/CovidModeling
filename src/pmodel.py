@@ -13,7 +13,7 @@ class PredictionModel:
         """
         Fit model parameters using data.
         Args:
-            x (torch.tensor): (ntimes, 3) data
+            x (np.array): (ntimes, 3) data
         """
         raise NotImplementedError
         

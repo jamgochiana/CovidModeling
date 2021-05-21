@@ -39,20 +39,19 @@ def main(model_name, data_file, i_days, mva, batch_size, p_days):
         data, dates = utils.moving_average(data, dates, days=7)
     
     # split up data into batch_size train+test sequences
+    datasplit = utils.train_test_split_multi(data, dates, train_days=i_days, 
+                                             test_days=p_days, batch_size=batch_size, 
+                                             seed=0)
+    train, test, train_dates, test_dates = datasplit
     
+    # fit and predict on each sequence
+    c_preds, h_preds, d_preds = [], [], []
+    for i in range(B):
     
-    c_preds = []
-    h_preds = []
-    d_preds = []
-    # for each sequence
-    
-        # initialize new model
-        
-        # fit model
-        model.fit(s)
+        # refit model with new sequence
+        model.fit(train[i])
         
         # predict days
-        
         c_preds.append(model.predict_cases(p_days))
         h_preds.append(model.predict_hospitalizations(p_days))
         d_preds.append(model.predict_deaths(p_days))
