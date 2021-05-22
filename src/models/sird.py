@@ -1,4 +1,12 @@
 # sird.py
+
+# import sys
+# sys.path.append()
+# os.chdir('sird_src/CEEM')
+#
+import sys
+sys.path.append('./src/models/sird_src/CEEM')
+
 from src.pmodel import PredictionModel
 
 import numpy as np
@@ -24,18 +32,27 @@ class SIRD(PredictionModel):
     def fit(self, x):
         """
         Fit model parameters using data.
+        Data order: cases, hospitalizations, deaths.
+        Not using hospitalizations.
+
+        TO DO: Check dtype is correct.
+
         Args:
             x (np.array): (ntimes, 3) data
         """
 
-        # specify initial guess
+        #Initialize parameters.
         T = x.shape[0]
-        C0 = torch.from_numpy(x[:,0], dtype=dtype).reshape(1,T,1) #confirmed cases
+        C0 = torch.from_numpy(x[:,0]).reshape(1,T,1) #confirmed cases
         S0 = torch.ones_like(C0, dtype=dtype) * C0.max() * 100 # susceptible
         I0 = C0 #infected
-        D0 = torch.tensor(x[:,1], dtype=dtype).view(1,T,1) #deaths
+        D0 = torch.tensor(x[:,2], dtype=dtype).view(1,T,1) #deaths
         R0 = 0.5 * (C0 + D0) #recovered
         xsm = torch.cat([S0,I0,R0,D0,C0],dim=-1).log().detach()
+
+        B = 1 #batches I think
+        t = torch.arange(T, dtype=dtype).view(B,T).detach()
+        y = torch.stack([C0, D0], dim=-1).log().view(B,T,2).detach()
 
         self._system = CompartmentalSystem(beta=0.1, gamma=0.04, mu=0.004)
 
@@ -65,7 +82,7 @@ class SIRD(PredictionModel):
         # note: learning criteria do not need to be specified separately for each b in B
         dyncrit = GaussianDynamicsCriterion(Sig_w_inv, t)
         learning_criteria = [dyncrit]# since the observation objective doesnt depend on parameters
-        learning_params = [list(system.parameters())] # the parameters we want optimized
+        learning_params = [list(self._system.parameters())] # the parameters we want optimized
         learning_opts = ['scipy_minimize'] # the optimzer
         learner_opt_kwargs = {'method': 'Nelder-Mead', # optimizer for learning
                               'tr_rho': 0.1 # trust region for learning
@@ -83,7 +100,7 @@ class SIRD(PredictionModel):
 
     def predict_cases_and_deaths(self, days):
         """
-        Use model to predict cases and deaths for days days.
+        Use model to predict cases and deaths for days steps.
         Args:
             days (int): number of days forward to predict
         Returns:
@@ -94,10 +111,14 @@ class SIRD(PredictionModel):
         assert self._fitted == True, "Model is not fitted"
 
         S, I, R, D, C = [], [], [], [], []
-        x = self._xsm[:,-1,:].reshape(1,1,5)
 
+        #Intializes with the last day from the training set.
+        x = self._xsm[:,-1,:].reshape(1,1,5) #Change it
+
+        #Receives and feeds recurently predictions for days steps.
+        # TO DO: It doesn't perform as well as expected. Unless, I made a typo.
         for day in range(days):
-            x = system.step(torch.Tensor([day]).reshape(1),x)
+            x = self._system.step(torch.Tensor([day]).reshape(1),x)
             data = x.exp()
             S.append(data[0,:,0])
             I.append(data[0,:,1])
@@ -113,14 +134,12 @@ class SIRD(PredictionModel):
 
     def predict_cases(self, days):
         """
-        Use model to predict cases for days days.
+        Use model to predict cases for days steps.
         Args:
             days (int): number of days forward to predict
         Returns:
             C (np.array): (days,)-shaped array of case predictions
         """
-
-        assert self._fitted == True, "Model is not fitted"
 
         C, _ = self.predict_cases_and_deaths(days)
 
@@ -139,14 +158,12 @@ class SIRD(PredictionModel):
 
     def predict_deaths(self, days):
         """
-        Use model to predict deaths for days days.
+        Use model to predict deaths for days steps.
         Args:
             days (int): number of days forward to predict
         Returns:
             D (np.array): (days,)-shaped array of death predictions
         """
-
-        assert self._fitted == True, "Model is not fitted"
 
         _, D = self.predict_cases_and_deaths(days)
 
