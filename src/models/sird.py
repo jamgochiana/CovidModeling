@@ -1,9 +1,4 @@
 # sird.py
-
-# import sys
-# sys.path.append()
-# os.chdir('sird_src/CEEM')
-#
 import sys
 sys.path.append('./src/models/sird_src/CEEM')
 
