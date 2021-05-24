@@ -39,7 +39,7 @@ def moving_average(data, dates, days=7):
     mva_data = stacked.mean(axis=0)
     return mva_data, mva_dates
 
-def train_test_split(data, dates, test_days=21):
+def train_test_split(data, dates, test_days=7):
     """
     Split data into training and testing portions.
     
@@ -57,6 +57,36 @@ def train_test_split(data, dates, test_days=21):
     test, test_dates = data[(T-test_days):], dates[(T-test_days):]
     return train, test, train_dates, test_dates
 
+def train_test_split_multi(data, dates, train_days=42, test_days=7, 
+                           batch_size=25, seed=0):
+    """
+    Split data into training and testing portions.
+    
+    Args:
+        data (np.array): (n_times, n_vars)-sized array of COVID data
+        train_days (int): number of days to reserve for training
+        test_days (int): number of days to reserve for testing
+        batch_size (int): number of test sequences
+        seed (int): random seed
+    Returns:
+        train (np.array): (batch_size, n_times-test_days, n_vars)-sized array of training COVID data    
+        test (np.array): (batch_size, test_days, n_vars)-sized array of testing COVID data
+        train_dates (list of pd.Series): list of batch_size (n_times-test_days)-sized series of pd.datetimes    
+        test_dates (list of pd.Series): list of batch_size (test_days)-sized series of pd.datetimes
+    """
+    T, V = data.shape
+    np.random.seed(0)
+    train, test, train_dates, test_dates = [], [], [], []
+    for _ in range(batch_size):
+        start = np.random.randint(T-train_days-test_days)
+        train.append(data[start:(start+train_days)])
+        train_dates.append(dates[start:(start+train_days)])
+        test.append(data[(start+train_days):(start+train_days+test_days)])
+        test_dates.append(dates[(start+train_days):(start+train_days+test_days)])
+    train = np.stack(train)
+    test = np.stack(test)
+    return train, test, train_dates, test_dates
+
 # metrics
 
 def rmse(pred, true):
@@ -64,27 +94,27 @@ def rmse(pred, true):
     Return RMSE between predicted and true trajectories.
     
     Args:
-        pred (np.array): (n,)-sized predicted data trajectory
-        true (np.array): (n,)-sized true data trajectory
+        pred (np.array): (B,n_times)-sized predicted data trajectory
+        true (np.array): (B,n_times)-sized true data trajectory
     Returns:
-        rwse (float): root mean squared error between the trajectories
+        rmse (np.array): (B,) root mean squared error between the trajectories
     """
     assert pred.shape==true.shape, "Shape mismatch"
-    rwse = ((pred-true)**2).mean()**0.5
-    return rwse
+    rmse = ((pred-true)**2).mean(-1)**0.5
+    return rmse
 
 def mape(pred, true):
     """
     Return MAPE between predicted and true trajectories.
     
     Args:
-        pred (np.array): (n,)-sized predicted data trajectory
-        true (np.array): (n,)-sized true data trajectory
+        pred (np.array): (B,n_times)-sized predicted data trajectory
+        true (np.array): (B,n_times)-sized true data trajectory
     Returns:
-        mape (float): mean absolute percentage error between the trajectories (expressed as a decimal)
+        mape (np.array): (B,) mean absolute percentage error between the trajectories (expressed as a decimal)
     """
     assert pred.shape==true.shape, "Shape mismatch"
-    mape = abs((true-pred)/true).mean()
+    mape = abs((true-pred)/true).mean(-1)
     return mape
 
 def mae(pred, true):
@@ -92,11 +122,11 @@ def mae(pred, true):
     Return MAE between predicted and true trajectories.
     
     Args:
-        pred (np.array): (n,)-sized predicted data trajectory
-        true (np.array): (n,)-sized true data trajectory
+        pred (np.array): (B,n_times)-sized predicted data trajectory
+        true (np.array): (B,n_times)-sized true data trajectory
     Returns:
-        mape (float): mean absolute  error between the trajectories (expressed as a decimal)
+        mape (np.array): (B,) mean absolute  error between the trajectories (expressed as a decimal)
     """
     assert pred.shape==true.shape, "Shape mismatch"
-    mape = abs(true-pred).mean()
+    mape = abs(true-pred).mean(-1)
     return mae
