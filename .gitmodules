@@ -1,3 +1,6 @@
 [submodule "src/models/sird_src/CEEM"]
 	path = src/models/sird_src/CEEM
 	url = https://github.com/sisl/CEEM
+[submodule "src/models/seird_src/CEEM"]
+	path = src/models/seird_src/CEEM
+	url = https://github.com/sisl/CEEM

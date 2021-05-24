@@ -5,14 +5,14 @@ import numpy as np
 def read_csv(path):
     """
     Read csv of processed data and return data, columns, and dates.
-    
+
     Args:
         path (string): path to data csv
     Returns:
         data (np.array): (n_times, n_vars)-sized array of COVID data
         dates (pd.Series): (n_times)-sized series of pd.datetimes
         columns (list of strings): list of column names
-  
+
     """
     df = pd.read_csv(path)
     dates = pd.to_datetime(df.iloc[:,0].values)
@@ -24,7 +24,7 @@ def read_csv(path):
 def moving_average(data, dates, days=7):
     """
     Perform moving averaging over data.
-    
+
     Args:
         data (np.array): (n_times, n_vars)-sized array of COVID data
         dates (pd.Series): (n_times)-sized series of pd.datetimes
@@ -42,14 +42,14 @@ def moving_average(data, dates, days=7):
 def train_test_split(data, dates, test_days=7):
     """
     Split data into training and testing portions.
-    
+
     Args:
         data (np.array): (n_times, n_vars)-sized array of COVID data
         test_days (int): number of days to reserve for testing
     Returns:
-        train (np.array): (n_times-test_days, n_vars)-sized array of training COVID data    
+        train (np.array): (n_times-test_days, n_vars)-sized array of training COVID data
         test (np.array): (test_days, n_vars)-sized array of testing COVID data
-        train_dates (pd.Series): (n_times-test_days)-sized series of pd.datetimes    
+        train_dates (pd.Series): (n_times-test_days)-sized series of pd.datetimes
         test_dates (pd.Series): (test_days)-sized series of pd.datetimes
     """
     T, V = data.shape
@@ -57,11 +57,11 @@ def train_test_split(data, dates, test_days=7):
     test, test_dates = data[(T-test_days):], dates[(T-test_days):]
     return train, test, train_dates, test_dates
 
-def train_test_split_multi(data, dates, train_days=42, test_days=7, 
+def train_test_split_multi(data, dates, train_days=42, test_days=7,
                            batch_size=25, seed=0):
     """
     Split data into training and testing portions.
-    
+
     Args:
         data (np.array): (n_times, n_vars)-sized array of COVID data
         train_days (int): number of days to reserve for training
@@ -69,9 +69,9 @@ def train_test_split_multi(data, dates, train_days=42, test_days=7,
         batch_size (int): number of test sequences
         seed (int): random seed
     Returns:
-        train (np.array): (batch_size, n_times-test_days, n_vars)-sized array of training COVID data    
+        train (np.array): (batch_size, n_times-test_days, n_vars)-sized array of training COVID data
         test (np.array): (batch_size, test_days, n_vars)-sized array of testing COVID data
-        train_dates (list of pd.Series): list of batch_size (n_times-test_days)-sized series of pd.datetimes    
+        train_dates (list of pd.Series): list of batch_size (n_times-test_days)-sized series of pd.datetimes
         test_dates (list of pd.Series): list of batch_size (test_days)-sized series of pd.datetimes
     """
     T, V = data.shape
@@ -92,7 +92,7 @@ def train_test_split_multi(data, dates, train_days=42, test_days=7,
 def rmse(pred, true):
     """
     Return RMSE between predicted and true trajectories.
-    
+
     Args:
         pred (np.array): (B,n_times)-sized predicted data trajectory
         true (np.array): (B,n_times)-sized true data trajectory
@@ -106,7 +106,7 @@ def rmse(pred, true):
 def mape(pred, true):
     """
     Return MAPE between predicted and true trajectories.
-    
+
     Args:
         pred (np.array): (B,n_times)-sized predicted data trajectory
         true (np.array): (B,n_times)-sized true data trajectory
@@ -120,7 +120,7 @@ def mape(pred, true):
 def mae(pred, true):
     """
     Return MAE between predicted and true trajectories.
-    
+
     Args:
         pred (np.array): (B,n_times)-sized predicted data trajectory
         true (np.array): (B,n_times)-sized true data trajectory
@@ -128,5 +128,5 @@ def mae(pred, true):
         mape (np.array): (B,) mean absolute  error between the trajectories (expressed as a decimal)
     """
     assert pred.shape==true.shape, "Shape mismatch"
-    mape = abs(true-pred).mean(-1)
+    mae = abs(true-pred).mean(-1)
     return mae

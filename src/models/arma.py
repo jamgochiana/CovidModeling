@@ -10,7 +10,7 @@ class ARMA(PredictionModel):
     Class for autoregressive moving average with LASSO regularization.
     """
 
-    def __init__(self, roll_window_size=14, lam=1., alpha = 0.1, normalize = False, max_iter = 1e7):
+    def __init__(self, roll_window_size=14, lam=1., alpha = 5.0, normalize = False, max_iter = 1e7):
         """
         Args:
             input_length (int): days for input time-series
@@ -22,7 +22,7 @@ class ARMA(PredictionModel):
         self._alpha = alpha
         self._max_iter = max_iter
         self._roll_window_size = roll_window_size
-        self._model = Lasso(self._alpha, self._max_iter)
+        self._model = Lasso(alpha=self._alpha, max_iter=self._max_iter)
 
     def fit(self, x):
         """
@@ -80,11 +80,11 @@ class ARMA(PredictionModel):
     def predict_hospitalizations(self, days):
         assert self._fitted, "Model not yet fit"
 
-        pred = slef.predict(days)
+        pred = self.predict(days)
         return pred[:,0]
 
     def predict_deaths(self, days):
         assert self._fitted, "Model not yet fit"
 
-        pred = slef.predict(days)
+        pred = self.predict(days)
         return pred[:,1]

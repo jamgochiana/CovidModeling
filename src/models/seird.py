@@ -1,6 +1,6 @@
 # sird.py
 import sys
-sys.path.append('./src/models/sird_src/CEEM')
+sys.path.append('./src/models/seird_src/CEEM')
 
 from src.pmodel import PredictionModel
 
@@ -14,7 +14,7 @@ from ceem.ceem import CEEM
 torch.set_default_dtype(torch.float64)
 dtype=torch.get_default_dtype()
 
-class SIRD(PredictionModel):
+class SEIRD(PredictionModel):
 
     def __init__(self):
         """
@@ -114,15 +114,15 @@ class SIRD(PredictionModel):
         # TO DO: It doesn't perform as well as expected. Unless, I made a typo.
         for day in range(days):
             x = self._system.step(torch.Tensor([day]).reshape(1),x)
-            data = x.exp()
+            data = x.exp().detach().numpy()
             S.append(data[0,:,0])
             I.append(data[0,:,1])
             R.append(data[0,:,2])
             D.append(data[0,:,3])
             C.append(data[0,:,4])
 
-        C = np.array(C)
-        D = np.array(D)
+        C = np.array(C)[:,0]
+        D = np.array(D)[:,0]
 
         return C, D
 
