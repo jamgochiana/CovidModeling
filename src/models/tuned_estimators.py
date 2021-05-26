@@ -1,5 +1,5 @@
 '''
-This file contains the functions used to estimate 
+This file contains the functions used to estimate
 the gamma parameters of our models
 '''
 
@@ -9,11 +9,21 @@ import cvxpy as cp
 #import sklearn
 import math
 
+
+"""
+U - healthy actively infected
+V - hospital ish infections
+
+"""
+
+
+
 def estimate_params2(V, U):
     if len(V) != len(U):
         raise ValueError("Arrays must have the same size")
+        
     T = len(V)
-    
+
     gammas = np.ones(2)
     iters = 300
     for i in range(iters):
@@ -22,8 +32,8 @@ def estimate_params2(V, U):
             grad[0] += (U[t] + V[t]) * ((U[t] + V[t]) * gammas[0] - V[t+1])
             grad[1] += (U[t] + V[t]) * ((U[t] + V[t]) * gammas[1] - U[t+1])
         gammas = gammas - grad * (0.5 / math.sqrt(i+1)) / np.linalg.norm(grad)
-        
-    
+
+
     return gammas
 
 
@@ -31,7 +41,7 @@ def estimate_params4(V, U):
     if len(V) != len(U):
         raise ValueError("Arrays must have the same size")
     T = len(V)
-    
+
     gammas = np.ones((2, 2))
     iters = 1000
     for i in range(iters):
@@ -56,7 +66,7 @@ def l1_estimate_params2(V, U, lbd):
     if len(V) != len(U):
         raise ValueError("Arrays must have the same size")
     T = len(V)
-    
+
     gammas = np.ones((T-1, 2))
     iters = 400
     for i in range(iters):
@@ -72,7 +82,7 @@ def l1_estimate_params2(V, U, lbd):
             else:
             	if gammas[t, 0] - gammas[t+1, 0] < 0:
             		grad[t, 0] -= lbd
-            
+
             if gammas[t, 1] - gammas[t+1, 1] > 0:
             	grad[t, 1] += lbd
             else:
@@ -81,7 +91,7 @@ def l1_estimate_params2(V, U, lbd):
 
 
         gammas = gammas - grad * (0.1 / math.sqrt(i+1)) / np.linalg.norm(grad)
-    
+
     return gammas
 
 
@@ -91,7 +101,7 @@ def l1_estimate_params4(V, U, lbd):
     if len(V) != len(U):
         raise ValueError("Arrays must have the same size")
     T = len(V)
-    
+
     gammas = np.ones((T, 4))
     iters = 800
     for i in range(iters):
@@ -110,7 +120,7 @@ def l1_estimate_params4(V, U, lbd):
             else:
             	if gammas[t, 0] - gammas[t+1, 0] < 0:
             		grad[t, 0] -= lbd
-            
+
             if gammas[t, 1] - gammas[t+1, 1] > 0:
             	grad[t, 1] += lbd
             else:
@@ -119,7 +129,7 @@ def l1_estimate_params4(V, U, lbd):
 
 
         gammas = gammas - grad * (0.1 / math.sqrt(i+1)) / np.linalg.norm(grad)
-    
+
     return gammas
 
 
@@ -131,7 +141,7 @@ def delta_estimate_params2(V, U, delta):
     if len(V) != len(U):
         raise ValueError("Arrays must have the same size")
     T = len(V)
-    
+
     gammas = np.ones((T, 2))
     iters = 300
     for i in range(iters):
@@ -140,8 +150,8 @@ def delta_estimate_params2(V, U, delta):
             grad[t, 0] += (U[t] + V[t]) * ((U[t] + V[t]) * gammas[t, 0] - V[t+1])
             grad[t, 1] += (U[t] + V[t]) * ((U[t] + V[t]) * gammas[t, 1] - U[t+1])
         gammas = gammas - grad * (0.3 / math.sqrt(i+1)) / np.linalg.norm(grad)
-        
-    
+
+
     return gammas
 
 
@@ -149,7 +159,7 @@ def delta_estimate_params4(V, U, delta):
     if len(V) != len(U):
         raise ValueError("Arrays must have the same size")
     T = len(V)
-    
+
     gammas = np.ones((T, 4))
     iters = 100
     for i in range(iters):
@@ -175,13 +185,3 @@ def delta_estimate_params4(V, U, delta):
 
     print("done")
     return gammas
-
-
-
-
-
-
-
-
-
-

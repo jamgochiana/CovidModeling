@@ -6,6 +6,7 @@ sys.path.append('./')
 import numpy as np
 from src.models.arma import ARMA
 from src.models.seird import SEIRD
+from src.models.gamma import GAMMA
 # from src.models.andrei import ANDREI
 from src import utils
 
@@ -25,8 +26,14 @@ def main(model_name, data_file, i_days, mva, batch_size, p_days):
         model = ARMA()
     elif model_name == 'seird':
         model = SEIRD()
-    elif model_name == 'andrei':
-        model = ANDREI()
+    elif model_name == 'gamma':
+        model_type = 'default' #There is no other model for now.
+        delta1 = 11
+        delta2 = 18
+        delta3 = 14
+        p = 0.02
+        num_past_days = 7
+        model = GAMMA(model_type, delta1, delta2, delta3, p, num_past_days) #Config file needs to be added.
     else:
         raise('Invalid model type:', model)
 
@@ -90,7 +97,7 @@ def main(model_name, data_file, i_days, mva, batch_size, p_days):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='Run Covid Modeling Experiment.')
-    parser.add_argument('--model', choices=['arma', 'seird', 'andrei'],
+    parser.add_argument('--model', choices=['arma', 'seird', 'gamma'],
                         default='arma', help='model')
     parser.add_argument('--data', type=str, required=True,
                         help='datafile (with .csv, no path)')
