@@ -46,9 +46,10 @@ def gamma2_predict_hosp(U, V, pred, forward, delta1, delta2):
 
 	return predictions
 
-
-def gamma4_populate_V_U(V, U, gm, start):
+def gamma2_populate_V_U(V, U, gm, start):
 	'''
+	Function that predicts hospitalizations several days ahead
+	assuming the 2-gamma infection dynamics model.
 
 	U - (np array) estimated (computed) number of daily
 	infections of U-type individuals
@@ -56,7 +57,7 @@ def gamma4_populate_V_U(V, U, gm, start):
 	V - (np array) number of daily infections of V-type
 	individuals (this data us given at the beginning)
 
-	pred - (np array) size = (T, 4)
+	pred - (np array) size = (T, 2)
 
 	forward: (int) how many days we want to predict forward
 	into the future
@@ -68,14 +69,15 @@ def gamma4_populate_V_U(V, U, gm, start):
 	Vnext = V[start]
 
 	for i in range(forward):
-		Vnext = gm[0] * Vnext + gm[1] * Unext
-		Unext = gm[2] * Vnext + gm[3] * Unext
-		nb = Vnext + Unext
-
+		nb = Unext + Vnext
+		Vnext = nb * gm[0]
+		Unext = nb * gm[1]
 		V[start+i] = Vnext
 		U[start+i] = Unext
 
 	return V, U
+
+
 
 def gamma2_predict_deaths(U, V, pred, forward, delta1, delta2):
 	'''
@@ -113,18 +115,6 @@ def gamma2_predict_deaths(U, V, pred, forward, delta1, delta2):
 
 	return predictions
 
-
-
-
-
-
-
-
-
-
-
-
-
 def gamma2_predict_cases(U, V, pred, forward, delta1, delta2):
 	'''
 	Function that predicts hospitalizations several days ahead
@@ -160,3 +150,34 @@ def gamma2_predict_cases(U, V, pred, forward, delta1, delta2):
 		predictions[t - delta2 + forward + delay] = nb
 
 	return predictions
+
+
+def gamma4_populate_V_U(V, U, gm, start):
+	'''
+
+	U - (np array) estimated (computed) number of daily
+	infections of U-type individuals
+
+	V - (np array) number of daily infections of V-type
+	individuals (this data us given at the beginning)
+
+	pred - (np array) size = (T, 4)
+
+	forward: (int) how many days we want to predict forward
+	into the future
+	'''
+
+	forward = V.shape[0] - start
+
+	Unext = U[start]
+	Vnext = V[start]
+
+	for i in range(forward):
+		Vnext = gm[0] * Vnext + gm[1] * Unext
+		Unext = gm[2] * Vnext + gm[3] * Unext
+		#nb = Vnext + Unext
+
+		V[start+i] = Vnext
+		U[start+i] = Unext
+
+	return V, U

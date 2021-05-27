@@ -8,6 +8,7 @@ from src.models.arma import ARMA
 from src.models.seird import SEIRD
 from src.models.gamma import GAMMA
 from src.models.gamma_l1 import GAMMA_L1
+from src.models.gamma_2 import GAMMA_2
 from src import utils
 
 import matplotlib.pyplot as plt
@@ -45,6 +46,16 @@ def main(model_name, data_file, i_days, mva, batch_size, p_days):
         num_past_days = 7
         lbd = 1000
         model = GAMMA_L1(model_type, delta1, delta2, delta3, p, num_past_days, lbd) #Config file needs to be added.
+    elif model_name == 'gamma_2':
+        model_type = 'default' #There is no other model for now.
+        delta1 = 11
+        delta2 = 18
+        delta3 = 14
+        p = 0.02
+        num_past_days = 7
+        lbd = 1000
+        model = GAMMA_2(model_type, delta1, delta2, delta3, p, num_past_days) #Config file needs to be added.
+
 
     else:
         raise('Invalid model type:', model)
@@ -114,7 +125,7 @@ def main(model_name, data_file, i_days, mva, batch_size, p_days):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='Run Covid Modeling Experiment.')
-    parser.add_argument('--model', choices=['arma', 'seird', 'gamma', 'gamma_l1'],
+    parser.add_argument('--model', choices=['arma', 'seird', 'gamma', 'gamma_l1', 'gamma_2'],
                         default='arma', help='model')
     parser.add_argument('--data', type=str, required=True,
                         help='datafile (with .csv, no path)')
