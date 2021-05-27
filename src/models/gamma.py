@@ -31,8 +31,8 @@ class GAMMA(PredictionModel):
         """
 
         self._t = x.shape[0] #Length of the dataset
-        self._V = np.zeros(self._t+self.populate_days) #Vulnerable ind.
-        self._U = np.zeros(self._t+self.populate_days) #Non-vulnerable ind.
+        self._V = np.zeros(self._t+self.populate_days) #Vulnerable individuals.
+        self._U = np.zeros(self._t+self.populate_days) #Non-vulnerable individuals.
 
         #Dataset processing.
         self._V[:self._t], self._U[:self._t] = self.data_preprocessing(x)
@@ -66,18 +66,6 @@ class GAMMA(PredictionModel):
         return gm.flatten()
 
 
-    def predict_cases(self, days):
-        """
-        Use model to .
-        Args:
-            days (int): number of days forward to predict
-        Returns:
-            pred (np.array): (days,)-shaped array of case predictions
-        """
-
-        print('Cases prediction not implemented')
-        return None
-
     def predict_hospitalizations(self, days):
         """
         Fit model to data.
@@ -106,7 +94,7 @@ class GAMMA(PredictionModel):
         if self._fitted:
             nb = self._V[self._t - self._delta2:self._t - self._delta2 + days] + self._U[self._t - self._delta2:self._t - self._delta2 + days]
             deaths = nb * self._p
-            return deaths
+            return deaths/14
         else:
             print('Model is not fitted!')
             return None

@@ -7,8 +7,10 @@ import numpy as np
 from src.models.arma import ARMA
 from src.models.seird import SEIRD
 from src.models.gamma import GAMMA
-# from src.models.andrei import ANDREI
+from src.models.gamma_l1 import GAMMA_L1
 from src import utils
+
+import matplotlib.pyplot as plt
 
 def main(model_name, data_file, i_days, mva, batch_size, p_days):
     """
@@ -34,6 +36,16 @@ def main(model_name, data_file, i_days, mva, batch_size, p_days):
         p = 0.02
         num_past_days = 7
         model = GAMMA(model_type, delta1, delta2, delta3, p, num_past_days) #Config file needs to be added.
+    elif model_name == 'gamma_l1':
+        model_type = 'default' #There is no other model for now.
+        delta1 = 11
+        delta2 = 18
+        delta3 = 14
+        p = 0.02
+        num_past_days = 7
+        lbd = 1000
+        model = GAMMA_L1(model_type, delta1, delta2, delta3, p, num_past_days, lbd) #Config file needs to be added.
+
     else:
         raise('Invalid model type:', model)
 
@@ -70,6 +82,7 @@ def main(model_name, data_file, i_days, mva, batch_size, p_days):
     print("Model:", model_name)
 
     c_true, h_true, d_true = test[...,0], test[...,1], test[...,2]
+
     for (pred, true, name) in [(c_preds, c_true, "Cases"),
                                (h_preds, h_true, "Hospitalizations"),
                                (d_preds, d_true, "Deaths")]:
@@ -94,10 +107,14 @@ def main(model_name, data_file, i_days, mva, batch_size, p_days):
                                (mapes,"MAPE")]:
             print('%s: %f \pm %f'%(name, metric.mean(), metric.std()/(len(metric)**0.5)))
 
+    #plotting
+    utils.plotting(train, test, c_preds, h_preds, d_preds, model_name)
+
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='Run Covid Modeling Experiment.')
-    parser.add_argument('--model', choices=['arma', 'seird', 'gamma'],
+    parser.add_argument('--model', choices=['arma', 'seird', 'gamma', 'gamma_l1'],
                         default='arma', help='model')
     parser.add_argument('--data', type=str, required=True,
                         help='datafile (with .csv, no path)')

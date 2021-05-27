@@ -21,7 +21,7 @@ V - hospital ish infections
 def estimate_params2(V, U):
     if len(V) != len(U):
         raise ValueError("Arrays must have the same size")
-        
+
     T = len(V)
 
     gammas = np.ones(2)
@@ -43,7 +43,7 @@ def estimate_params4(V, U):
     T = len(V)
 
     gammas = np.ones((2, 2))
-    iters = 1000
+    iters = int(1e4)
     for i in range(iters):
         grad = np.zeros((2, 2))
         for t in range(T-1):
@@ -59,9 +59,6 @@ def estimate_params4(V, U):
 '''
 The functions that penalize the objective with L_1
 '''
-
-
-
 def l1_estimate_params2(V, U, lbd):
     if len(V) != len(U):
         raise ValueError("Arrays must have the same size")

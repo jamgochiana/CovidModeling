@@ -1,6 +1,7 @@
 # utils.py
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 def read_csv(path):
     """
@@ -130,3 +131,43 @@ def mae(pred, true):
     assert pred.shape==true.shape, "Shape mismatch"
     mae = abs(true-pred).mean(-1)
     return mae
+
+def plotting(train_dataset, test_dataset, c_preds, h_preds, d_preds, model_name):
+
+    B = train_dataset.shape[0]
+
+
+    for b in range(B):
+        plt.figure()
+        plt.title(f'Model: {model_name} Batch:{b}')
+
+        c_train, h_train, d_train = train_dataset[b,...,0], train_dataset[b,...,1], train_dataset[b,...,2]
+        c_test, h_test, d_test = test_dataset[b,...,0], test_dataset[b,...,1], test_dataset[b,...,2]
+        c_pred, h_pred, d_pred = c_preds[b], h_preds[b], d_preds[b]
+
+        for (pred, test, train, name, color) in [(c_pred, c_test, c_train, "Cases", 'orange'),
+                                   (h_pred, h_test, h_train, "Hospitalizations", 'green'),
+                                   (d_pred, d_test, d_train, "Deaths", 'red')]:
+           if (np.array([pred]) == None).any():
+               continue
+
+           pred = np.stack(pred, axis=0)
+           true = np.concatenate([train, test], axis=0)
+           time = np.arange(true.shape[0])
+           test_time = np.arange(start = train.shape[0], stop = train.shape[0] + test.shape[0])
+
+           plt.plot(test_time, pred, label= name +' prediction', color=color, linestyle='dashed')
+
+           plt.plot(time, true, label = name + ' truth', color=color)
+
+        n_steps = 30
+        step = (np.amax(c_train))/n_steps
+        max = np.amax(c_train)
+        horizontal_x = np.arange(start=0, stop=max, step=step)
+        horizontal_y = [train.shape[0]]*n_steps
+        plt.plot(horizontal_y[:n_steps], horizontal_x[:n_steps], color='grey', linestyle='dashed')
+        plt.xlabel('days')
+        plt.ylabel('value')
+
+        plt.legend()
+        plt.show()
